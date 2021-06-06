@@ -25,7 +25,18 @@ namespace TestCosmosClient
             var sqlQueryText = "SELECT * FROM c WHERE c.val = 'a'";
 
             QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
-            FeedIterator feedIterator = container.GetItemQueryIterator(queryDefinition);
+            FeedIterator<CosmosDoc> feedIterator = container.GetItemQueryIterator<CosmosDoc>(queryDefinition);
+
+            while(feedIterator.HasMoreResults)
+            {
+                var thisTask = feedIterator.ReadNextAsync();
+                thisTask.Wait();
+                FeedResponse<CosmosDoc> thisResultSet = thisTask.Result;
+                foreach(CosmosDoc doc in thisResultSet)
+                {
+                    Console.WriteLine($"{doc.Id} - {doc.Val} - {doc.PartKey}");
+                }
+            }
 
 
 
